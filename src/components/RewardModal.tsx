@@ -1,5 +1,6 @@
 import { MapFragment } from '@/types';
 import { difficultyLabel, durationLabel } from '@/lib/mapFragments';
+import FragmentTile from './FragmentTile';
 import Icon from '@/components/ui/icon';
 
 interface RewardModalProps {
@@ -8,78 +9,69 @@ interface RewardModalProps {
 }
 
 export default function RewardModal({ fragment, onClose }: RewardModalProps) {
+  const sizeLabel = fragment.size === 'small' ? 'малый' : fragment.size === 'medium' ? 'средний' : 'крупный';
+  const sz = fragment.size === 'small' ? 180 : fragment.size === 'medium' ? 220 : 260;
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-6"
-      style={{ background: 'rgba(40,32,20,0.7)', backdropFilter: 'blur(4px)' }}
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+      style={{ background: 'rgba(28,20,10,0.75)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
       <div
-        className="relative flex flex-col items-center gap-5 p-8 rounded-3xl max-w-sm w-full animate-scale-in"
+        className="relative flex flex-col items-center gap-4 pt-8 pb-8 px-8 w-full max-w-sm animate-scale-in rounded-t-3xl sm:rounded-3xl"
         style={{
-          background: 'var(--clr-paper)',
+          background: `
+            radial-gradient(ellipse at 40% 20%, rgba(200,170,100,0.12) 0%, transparent 60%),
+            var(--clr-paper)
+          `,
           border: '1px solid var(--clr-sand)',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+          boxShadow: '0 -8px 60px rgba(0,0,0,0.4), 0 0 0 1px rgba(180,150,80,0.1)',
         }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Decorative corner marks */}
-        <div className="absolute top-4 left-4 w-4 h-4 border-t border-l opacity-30" style={{ borderColor: 'var(--clr-dust)' }} />
-        <div className="absolute top-4 right-4 w-4 h-4 border-t border-r opacity-30" style={{ borderColor: 'var(--clr-dust)' }} />
-        <div className="absolute bottom-4 left-4 w-4 h-4 border-b border-l opacity-30" style={{ borderColor: 'var(--clr-dust)' }} />
-        <div className="absolute bottom-4 right-4 w-4 h-4 border-b border-r opacity-30" style={{ borderColor: 'var(--clr-dust)' }} />
+        {/* Pull handle */}
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-10 h-1 rounded-full sm:hidden" style={{ background: 'var(--clr-sand)' }} />
 
-        <p className="text-xs tracking-widest uppercase" style={{ color: 'var(--clr-dust)' }}>
-          новый фрагмент карты
-        </p>
+        {/* Corner ornaments */}
+        {[['top-5 left-5', 'border-t border-l'], ['top-5 right-5', 'border-t border-r'],
+          ['bottom-5 left-5', 'border-b border-l'], ['bottom-5 right-5', 'border-b border-r']].map(([pos, brd], i) => (
+          <div key={i} className={`absolute ${pos} w-4 h-4 ${brd} opacity-25`} style={{ borderColor: 'var(--clr-dust)' }} />
+        ))}
 
-        <p className="font-display text-2xl text-center" style={{ color: 'var(--clr-ink)' }}>
-          Путь пройден
-        </p>
-
-        {/* Fragment image */}
+        {/* Badge */}
         <div
-          className="relative"
-          style={{
-            width: 200,
-            height: 200,
-            borderRadius: '12px',
-            overflow: 'hidden',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
-          }}
+          className="flex items-center gap-1.5 px-3 py-1 rounded-full"
+          style={{ background: 'var(--clr-parchment)', border: '1px solid var(--clr-sand)' }}
         >
-          <img
-            src={fragment.imageUrl}
-            alt="фрагмент карты"
-            className="w-full h-full object-cover"
-            style={{ filter: 'sepia(30%) contrast(0.95)' }}
-          />
-          {/* Torn edge overlay */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background: 'radial-gradient(ellipse at center, transparent 60%, rgba(245,239,224,0.4) 100%)',
-            }}
-          />
-          <div
-            className="absolute bottom-2 right-2 text-xs px-2 py-0.5 rounded-full"
-            style={{ background: 'rgba(0,0,0,0.5)', color: '#fff' }}
-          >
-            {fragment.size === 'small' ? 'малый' : fragment.size === 'medium' ? 'средний' : 'крупный'}
-          </div>
+          <span className="text-[10px] tracking-[0.15em] uppercase font-body" style={{ color: 'var(--clr-dust)' }}>
+            новый фрагмент · {sizeLabel}
+          </span>
         </div>
 
-        <p className="text-sm font-body text-center" style={{ color: 'var(--clr-dust)' }}>
+        {/* Title */}
+        <p className="font-display text-3xl text-center leading-tight" style={{ color: 'var(--clr-ink)' }}>
+          {fragment.label ?? 'Кусочек мира'}
+        </p>
+
+        {/* The fragment itself — torn paper effect */}
+        <div className="my-1">
+          <FragmentTile fragment={fragment} size={sz} />
+        </div>
+
+        {/* Meta */}
+        <p className="text-xs font-body text-center" style={{ color: 'var(--clr-dust)' }}>
           {durationLabel[fragment.duration]} · {difficultyLabel[fragment.difficulty]}
         </p>
 
+        {/* CTA */}
         <button
           onClick={onClose}
-          className="flex items-center gap-2 px-8 py-3 rounded-full font-body text-sm transition-all hover:scale-105 mt-1"
+          className="flex items-center gap-2 px-8 py-3.5 rounded-full font-body text-sm transition-all hover:scale-105 w-full justify-center mt-1"
           style={{ background: 'var(--clr-ink)', color: 'var(--clr-parchment)' }}
         >
           <Icon name="Map" size={15} />
-          Добавить на карту
+          Разместить на карте
         </button>
       </div>
     </div>

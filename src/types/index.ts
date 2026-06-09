@@ -14,6 +14,8 @@ export interface MapFragment {
   id: string;
   mapId: string;
   imageUrl: string;
+  cropPos?: string;
+  label?: string;
   duration: Duration;
   difficulty: Difficulty;
   earnedAt: number;
